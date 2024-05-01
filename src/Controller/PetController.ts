@@ -26,6 +26,19 @@ export default class PetController{
         })
     }
 
-    
+    atualizaPet(req: Request, res: Response){
+        //convert o body da requisição em um Pet
+        const {id, nome, especie, idade, adotado} = <Pet>req.body;
+        listaPets.forEach(pet =>{
+            if(pet.id == id){
+                pet.nome = nome;
+                pet.idade = idade;
+                pet.especie = especie;
+                pet.adotado = adotado;
+            }
+        })
+        
+        res.status(201)
+    }
 
 }
