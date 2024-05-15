@@ -1,17 +1,17 @@
-
+import EnumEspecies from "../Enum/Especies";
 
 export default class Pet{
-    public id: Number;
-    public nome: String;
-    public especie: String;
-    public idade: Number;
-    public adotado: Boolean;
+    public id: number;
+    public nome: string;
+    public especie: EnumEspecies;
+    public dataNasc: Date;
+    public adotado: boolean;
 
-    constructor(id: Number, nome: String, especie: String, idade: Number, adotado: Boolean){
+    constructor(id: number, nome: string, especie: EnumEspecies, dataNasc: Date, adotado: boolean){
         this.id = id;
         this.nome = nome;
         this.especie = especie;
-        this.idade =idade;
+        this.dataNasc =dataNasc;
         this.adotado = adotado;
     }
 }
