@@ -11,7 +11,7 @@ export default class PetRepository implements InterfacePetRepository{
     }
 
     AdicionaPet(pet: PetEntity):boolean{
-       try{
+       try{    
         this.repository.save(pet)
         return true
        }
@@ -20,10 +20,9 @@ export default class PetRepository implements InterfacePetRepository{
         }
     }
 
-    DeletaPet(pet: PetEntity): boolean{
-
+    async DeletaPet(pet: PetEntity): Promise<boolean>{
         try{
-            this.repository.delete(pet)
+            await this.repository.delete(pet)
             return true
            }
             catch{
@@ -41,13 +40,9 @@ export default class PetRepository implements InterfacePetRepository{
     }
 
     async ObterPet(id: number):Promise<PetEntity> { 
-        try{
-           let pet: PetEntity;
-            pet = await this.repository.findOneBy({id:id})
-           return pet
-        }catch{
-            throw Error("Pet não encontrado")
-        }
+        
+        let pet = await this.repository.findOneBy({id:id})
+        return pet  
     }
 
     AtualizaPet(pet: PetEntity):boolean{
