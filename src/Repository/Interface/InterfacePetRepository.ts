@@ -6,7 +6,7 @@ export default interface InterfacePetRepository{
 
     AdicionaPet(pet: Pet): boolean;
 
-    DeletaPet(pet: Pet): boolean;
+    DeletaPet(pet: Pet): Promise<boolean>;
 
     ObterTodos(skip: number, take:number): Promise<Array<PetEntity>> | null;
 

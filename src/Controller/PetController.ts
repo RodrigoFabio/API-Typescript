@@ -3,27 +3,25 @@ import Pet from "../Model/Pet";
 import EnumEspecies from "../Enum/Especies";
 import InterfacePetRepository from "../Repository/Interface/InterfacePetRepository";
 import PetRepository from "../Repository/PetRepository";
+import PetEntity from "../Entity/PetEntity";
 
-let listaPets: Array<Pet>= [];
-let interfacePet : InterfacePetRepository;
-function geraId(lista: Array<Pet>){
-    let tamanhoArray = lista.length;
-    return tamanhoArray;
+let id = 0;
+function geraId(){
+    id = id + 1
+    return id
 }
-
+       
 export default class PetController{
-    constructor(private repository: PetRepository){
 
-    }
-    criaPet(req: Request, res: Response){
-        //convert o body da requisição em um Pet
-        const {nome, especie, dataNasc, adotado} = <Pet>req.body;
+    constructor(private repository: PetRepository){this.repository = repository}
+    async criaPet(req: Request, res: Response){
+        const {nome, especie, dataNasc, adotado} = <PetEntity>req.body;
         if(!Object.values(EnumEspecies).includes(especie)){
             return res.status(404).json({message:"Espécie inválida"});
         }
-        let id = geraId(listaPets)
-        const novoPet = new Pet(id, nome, especie, dataNasc, adotado);
-        let adicionado = this.repository.AdicionaPet(novoPet)
+        let id = geraId()
+        const novoPet = new PetEntity(id, nome, especie, dataNasc, adotado);
+        let adicionado = await this.repository.AdicionaPet(novoPet)
         if(adicionado){
            return res.status(201).json(novoPet)
         }
@@ -31,48 +29,51 @@ export default class PetController{
         return res.status(500)
     }
 
-    obterTodosPets(req: Request, res: Response){
-        let listaJson = JSON.stringify(listaPets)
-        res.send(listaJson)
+    async obterTodosPets(req: Request, res: Response, skip:number, take:number){
+        let resultado = await this.repository.ObterTodos(skip, take)
+        if(resultado != null){
+            return res.status(200).json(resultado) 
+        }
+        return res.status(404).json({message: "lista de pets vazia"})
     }
 
-    obterPet(req: Request, res: Response){
-        listaPets.forEach(pet => {
-            if(pet.id == req.body){
-                res.send(pet)
-                return;
-            }
-        })
+   async obterPet(req: Request, res: Response){
+       const id = req.body.id
+       let pet = await this.repository.ObterPet(parseInt(id))
+       if(pet != null){
+        return res.status(200).json(pet)
+       }
+       return res.status(404).json({message: "pet não existe"})
     }
 
-    atualizaPet(req: Request, res: Response){
-        //convert o body da requisição em um Pet
+    async atualizaPet(req: Request, res: Response){
         const {id, nome, especie, dataNasc, adotado} = <Pet>req.body;
-        const pet = listaPets.find((pet)=> pet.id === Number(id))  
+        const pet = await this.repository.ObterPet(id)  
 
         if(!pet){
             return res.status(404)
         }
-            
+
         pet.nome = nome;
         pet.dataNasc = dataNasc;
         pet.especie = especie;
         pet.adotado = adotado;
 
+        await this.repository.AtualizaPet(pet)
         res.status(201)
     }
 
-    deletaPet(req:Request, res: Response){
-        const id = Number(req.body);
-        const pet = listaPets.find((pet)=>{pet.id === id})
-        if(!pet){
-            res.statusMessage = "Pet não encontrado";
-            return res.status(401)
+    async deletaPet(req:Request, res: Response){
+        const id = parseInt(req.body.id);
+        let pet = await this.repository.ObterPet(id);
+        if(pet != null){
+            let resultado = await this.repository.DeletaPet(pet)
+            if(resultado){
+                return res.status(200).json({message:"pet deletado"})
+            }
+        }else{
+            return res.status(404).json({message:"pet não encontrado"})
         }
-        const index = listaPets.indexOf(pet)
-
-        listaPets.splice(index, 1);
-        return res.status(201)
         
     }
 
